@@ -21,21 +21,19 @@ secret number.
 Tags: short,game,puzzle
 
 """
-
-from ast import While
 import random
-import secrets
 
 NUM_DIGITS = 3
 MAX_GUESSES = 10
 
 
 def main():
-    print('''
-    Bagels, a deductive logic game.
-    By Emmanuel Munyite emunyite@gmail.com
+    print(f'''
+        Bagels, a deductive logic game.
+    ---------------------------------------
+    By Emmanuel Munyite (emunyite@gmail.com)
     
-    I am thinking of a {}-digit number with no repeated digits.
+    I am thinking of a {NUM_DIGITS}-digit number with no repeated digits.
     Try to guess the number. Here are some clues:
 
     When I say:     That means:
@@ -45,19 +43,19 @@ def main():
 
     For example, if the secret number was 248 and your guess was 843,
     the clues would be Fermi Pico.
-    '''.format(NUM_DIGITS)
+    '''
     )
 
     #   Main loop for running the game
     while True:
-        #   This stores the secret number the player needs to guess
+        #   This stores the secret number we will generate(player needs to guess this number)
         secretNum = getSecretNum()
         print('I have thought up a secret number')
         print(f'You have {MAX_GUESSES} guesses to get it.')
 
         numGuesses = 1
         while numGuesses <= MAX_GUESSES:
-            guess = ''
+            guess = ''  #   So that the player always gets a clean slate to feed the guesses
             #   Keep looping until they enter a valid guess
             while len(guess) != NUM_DIGITS or not guess.isdecimal():
                 print(f'Guess #{numGuesses}:')
@@ -110,7 +108,7 @@ def getClues(guess, secretNum):
             #   A correct digit in the right plae
             clues.append('Fermi')
         elif guess[i] in secretNum:
-            #   A correct digit in an in correct place.
+            #   A correct digit in an incorrect place.
             clues.append('Pico')
     if len(clues) == 0:
         return 'Bagels' # There are no correct digits
