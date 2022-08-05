@@ -67,7 +67,8 @@ def main():
 
 
             if guess == secretNum:
-                break   #   They are correct so break out of the loop
+                break   #   They are correct so break out of main the loop
+
             if numGuesses > MAX_GUESSES:
                 print('You ran out of guesses.')
                 print(f"The answer was {secretNum}")
@@ -110,6 +111,8 @@ def getClues(guess, secretNum):
         elif guess[i] in secretNum:
             #   A correct digit in an incorrect place.
             clues.append('Pico')
+
+            
     if len(clues) == 0:
         return 'Bagels' # There are no correct digits
 
