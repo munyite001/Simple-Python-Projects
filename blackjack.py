@@ -13,24 +13,24 @@ Tags: large, game, card game
  """
 
 
-
-from ast import While
-import dis
-from pickle import TRUE
-import random,sys
+import random
+from socket import BTPROTO_RFCOMM
+import sys
 
 #   Set up the constants:
-HEARTS   = chr(9829)      # Character 9829 is '♥'
-DIAMONDS = chr(9830)      # Character 9830 is '♦'.
-SPADES   = chr(9824)      # Character 9824 is '♠'.
-CLUBS    = chr(9827)      # Character 9827 is '♣'.  
+HEARTS   = chr(9829)      # Unicode 9829 is '♥'
+DIAMONDS = chr(9830)      # Unicode 9830 is '♦'.
+SPADES   = chr(9824)      # Unicode 9824 is '♠'.
+CLUBS    = chr(9827)      # Unicode 9827 is '♣'.  
 
+#   For printing the back of the cards
 BACKSIDE = 'backside'
 
 
 def main ():
-    print("""
-    ♣ Blackjack Card Game by Emmanuel Munyite ♣
+    print(
+    """
+        ♣ Blackjack Card Game by Emmanuel Munyite ♣
     ===================================================
 
     Rules:
@@ -39,26 +39,39 @@ def main ():
         Kings, Queens, and Jacks are worth 10 points.
         Aces are worth 1 or 11 points.
         Cards 2 through 10 are worth their face value.
+        i.e., card 2 will be worth 2 points etc
+        
+         Moves Allowed
+        -----------------
+
         (H)it to take another card.
+
         (S)tand to stop taking cards.
-        On your first play, you can (D)ouble down to increase your bet
-        but must hit exactly one more time before standing.
+
+        (D)ouble down to increase your bet.[only allowed during first round]
+        
+        NB: After Doubling down, You will automatically draw another card from deck
+
         In case of a tie, the bet is returned to the player.
         The dealer stops hitting at 17.
         
-    """)
+    """
+    )
 
-    money = 5000
+    
+    money = 5000    # Starting balance
+
     while True:  # Main game loop.
         # Check if the player has run out of money:
         if money <= 0:
             print("You're broke!")
             print("Good thing you weren't playing with real money.")
             print('Thanks for playing!')
-            sys.exit()
+            sys.exit()  #   Exit the game
 
-        # Let the player enter their bet for this round:
-        print('Money:', money)
+        # After validating that the player has money to bet,
+        # let player enter their bet for this round:
+        print(f'Money: ${money}')
         bet = getBet(money)
 
         # Give the dealer and player two cards from the deck each:
@@ -84,14 +97,14 @@ def main ():
                 # Player is doubling down, they can increase their bet:
                 additionalBet = getBet(min(bet, (money - bet)))
                 bet += additionalBet
-                print('Bet increased to {}.'.format(bet))
+                print(f'Bet increased to {bet}.')
                 print('Bet:', bet)
 
             if move in ('H', 'D'):
                 # Hit/doubling down takes another card.
                 newCard = deck.pop()
                 rank, suit = newCard
-                print('You drew a {} of {}.'.format(rank, suit))
+                print(f'You drew a {rank} of {suit}.')
                 playerHand.append(newCard)
 
                 if getHandValue(playerHand) > 21:
@@ -112,6 +125,7 @@ def main ():
 
                 if getHandValue(dealerHand) > 21:
                     break  # The dealer has busted.
+                
                 input('Press Enter to continue...')
                 print('\n\n')
 
@@ -139,31 +153,40 @@ def main ():
 
 def getBet(maxBet):
     """Ask the player how much they want to bet for this round."""
-    while True:  # Keep asking until they enter a valid amount.
-        print('How much do you bet? (1-{}, or QUIT)'.format(maxBet))
-        bet = input('> ').upper().strip()
-        if bet == 'QUIT':
-            print('Thanks for playing!')
-            sys.exit()
 
+    while True:  # Keep asking until they enter a valid amount.
+        print(f'How much will you bet for this round? (1-{maxBet}, or (Q)UIT)')
+        bet = input('> ').upper().strip()
+
+        #   Check if the player wants to exit
+        if bet == 'QUIT' or bet == 'Q':
+            print("Thanks for playing.")
+            sys.exit()
+        
+        #   Check that the player has entered a number
         if not bet.isdecimal():
-            continue  # If the player didn't enter a number, ask again.
+            continue    # Ask again
 
         bet = int(bet)
         if 1 <= bet <= maxBet:
-            return bet  # Player entered a valid bet.
+            return bet
+
 
 
 def getDeck():
-    """Return a list of (rank, suit) tuples for all 52 cards."""
+    """Return a list of (rank, suit) tuples for all 52 cards. [(r,s),(r,s),...]"""
     deck = []
-    for suit in (HEARTS, DIAMONDS, SPADES, CLUBS):
-        for rank in range(2, 11):
-            deck.append((str(rank), suit))  # Add the numbered cards.
-        for rank in ('J', 'Q', 'K', 'A'):
-            deck.append((rank, suit))  # Add the face and ace cards.
+    for suit in (HEARTS,DIAMONDS,CLUBS,SPADES):
+        for rank in range(2,11):
+            deck.append((str(rank),suit))   # Add the numbered cards
+        for rank in ('J','K','Q','A'):
+            deck.append((rank,suit))        # Add the face and Ace cards
+        
     random.shuffle(deck)
     return deck
+    
+
+
 
 
 def displayHands(playerHand, dealerHand, showDealerHand):
@@ -186,6 +209,9 @@ def displayHands(playerHand, dealerHand, showDealerHand):
 def getHandValue(cards):
     """Returns the value of the cards. Face cards are worth 10, aces are
     worth 11 or 1 (this function picks the most suitable ace value)."""
+
+    #   cards is a list, containing a tuple of cards
+
     value = 0
     numberOfAces = 0
 
@@ -202,7 +228,7 @@ def getHandValue(cards):
     # Add the value for the aces:
     value += numberOfAces  # Add 1 per ace.
     for i in range(numberOfAces):
-        # If another 10 can be added without busting, do so:
+        # If another 10 can be added without busting, do so thus Ace will be 11:
         if value + 10 <= 21:
             value += 10
 
@@ -213,7 +239,7 @@ def displayCards(cards):
     """Display all the cards in the cards list."""
     rows = ['', '', '', '', '']  # The text to display on each row.
 
-    for i, card in enumerate(cards):
+    for card in cards:
         rows[0] += ' ___  '  # Print the top line of the card.
         if card == BACKSIDE:
             # Print a card's back:
@@ -241,11 +267,12 @@ def getMove(playerHand, money):
 
         # The player can double down on their first move, which we can
         # tell because they'll have exactly two cards:
+
         if len(playerHand) == 2 and money > 0:
             moves.append('(D)ouble down')
 
         # Get the player's move:
-        movePrompt = ', '.join(moves) + '> '
+        movePrompt = ', '.join(moves) + ' > '
         move = input(movePrompt).upper()
         if move in ('H', 'S'):
             return move  # Player has entered a valid move.
